@@ -1,10 +1,16 @@
-const Koa = require("koa")
-const bodyParser = require('koa-bodyparser')
-const reigsterRouter = require('../router/register.router')
+const Koa = require("koa");
+const bodyParser = require("koa-bodyparser");
+const reigsterRouter = require("../router/register.router");
+const useRoutes = require("../router/index");
+const app = new Koa();
 
-const app = new Koa()
-app.use(bodyParser())
-app.use(reigsterRouter.routes())
-app.use(reigsterRouter.allowedMethods())
+app.use(async (ctx, next) => {
+  // ctx.set("Access-Control-Allow-Origin", "*");
+  // ctx.set("Access-Control-Allow-Headers", "*");
+  await next();
+});
 
-module.exports = app
+app.use(bodyParser());
+useRoutes(app);
+
+module.exports = app;
