@@ -1,7 +1,8 @@
 const KoaRouter = require("koa-router");
 
 const reigsterRouter = new KoaRouter();
-const registerService = require("../service/register.service");
+
+const { register } = require("../controller/register.controller");
 const data = [
   {
     id: 1,
@@ -84,12 +85,7 @@ function getAllChild(arry) {
   return childList;
 }
 
-reigsterRouter.post("/register", (ctx) => {
-  const { name, password } = ctx.request.body;
-  registerService.query(ctx.request.body);
-  console.log(ctx.request.body);
-  ctx.body = "注册成功";
-});
+reigsterRouter.post("/register", register);
 
 reigsterRouter.get("/menu", (ctx) => {
   console.log(ctx.header.hhh);
