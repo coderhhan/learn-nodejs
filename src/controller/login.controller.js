@@ -1,20 +1,20 @@
 const Mailer = require("../utils/mailer");
 const createCode = require("../utils/verify-code");
-const { queryByAccount } = require("../service/user.service");
+
 const {
   insertVerifyCode,
   updateVerifyCode,
   queryCodeByEmail,
 } = require("../service/user.service");
-const md5password = require("../utils/password-handle");
+
+const errorType = require("../constans/error-type");
+
 class LoginController {
   async sendCode(ctx, next) {
     const { email } = ctx.request.body;
     if (!email) {
-      return (ctx.body = {
-        code: 500,
-        message: "请输入邮箱",
-      });
+      const error = new Error(errorType.EMAIL_IS_REQUIRED);
+      return ctx.app.emit("error", error, ctx);
     }
     const code = createCode();
     try {
@@ -32,55 +32,14 @@ class LoginController {
         });
       } else {
         //发送失败执行的操作
-        console.log("发送失败了，错误为：" + res.rejected); //也是个数组
-        return (ctx.body = {
-          code: 500,
-          message: res.rejected,
-        });
+        // console.log("发送失败了，错误为：" + res.rejected); //也是个数组
+        return ctx.app.emit("error", res.rejected, ctx);
       }
     } catch (err) {
-      return (ctx.body = {
-        code: 500,
-        message: err,
-      });
+      return ctx.app.emit("error", err.message, ctx);
     }
   }
-  async loginUser(ctx, next) {
-    const { userAccount, password } = ctx.request.body;
-    console.log(userAccount);
-    if (userAccount === "" || userAccount == undefined) {
-      return (ctx.body = {
-        code: 500,
-        message: "请输入账号",
-      });
-    }
-    if (password === "" || password == undefined) {
-      return (ctx.body = {
-        code: 500,
-        message: "请输入密码",
-      });
-    }
-    const userData = await queryByAccount(userAccount);
-    if (userData.length === 0) {
-      return (ctx.body = {
-        code: 500,
-        message: "该账号不存在，请先注册",
-      });
-    }
-    const loginPassword = md5password(password);
-
-    if (loginPassword === userData[0].password) {
-      return (ctx.body = {
-        code: 200,
-        message: "登陆成功",
-      });
-    } else {
-      return (ctx.body = {
-        code: 500,
-        message: "账户或密码错误，登录失败",
-      });
-    }
-  }
+  async loginUser(ctx, next) {}
 }
 
 module.exports = new LoginController();

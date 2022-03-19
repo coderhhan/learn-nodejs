@@ -2,6 +2,7 @@ const { queryCodeByEmail } = require("../service/user.service");
 const userService = require("../service/user.service");
 const md5password = require("../utils/password-handle");
 
+const errorType = require("../constans/error-type");
 class RegisterController {
   async register(ctx, next) {
     const { userAccount, email, password, verifyCode } = ctx.request.body;
@@ -15,37 +16,26 @@ class RegisterController {
       emailData = await userService.queryByEmail(email);
     }
     if (accountData.length > 0) {
-      return (ctx.body = {
-        code: 500,
-        message: "账号已存在，请更换账号",
-      });
+      const error = new Error(errorType.USER_ACCOUNT_ALREADY_EXIST);
+      return ctx.app.emit("error", error, ctx);
     }
     if (emailData.length > 0) {
-      return (ctx.body = {
-        code: 500,
-        message: "该邮箱已经被注册，请更换邮箱",
-      });
+      const error = new Error(errorType.EMAIL_ALREADY_EXIST);
+      return ctx.app.emit("error", error, ctx);
     }
-
     if (userAccount === "" || userAccount == undefined) {
-      return (ctx.body = {
-        code: 500,
-        message: "请输入账号",
-      });
+      const error = new Error(errorType.USER_ACCOUNT_IS_REQUIRED);
+      return ctx.app.emit("error", error, ctx);
     }
     if (password === "" || password == undefined) {
-      return (ctx.body = {
-        code: 500,
-        message: "请输入密码",
-      });
+      const error = new Error(errorType.PASSWROD_IS_REQUIRED);
+      return ctx.app.emit("error", error, ctx);
     }
     //判断发送的验证码是否是注册的验证码
     const queryCode = await queryCodeByEmail(email);
     if (queryCode !== verifyCode) {
-      return (ctx.body = {
-        code: 500,
-        message: "验证码错误，注册失败",
-      });
+      const error = new Error(errorType.VERIFY_CODE_IS_INCORRECT);
+      return ctx.app.emit("error", error, ctx);
     }
     //插入数据到数据库中
     const formatePassword = md5password(password);
