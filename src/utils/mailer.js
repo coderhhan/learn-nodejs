@@ -1,6 +1,7 @@
 module.exports = Mailer;
 
 function Mailer(mailId, VerificationCode) {
+  console.log(mailId, VerificationCode);
   const nodemailer = require("nodemailer"); //引入依赖
   let transporter = nodemailer.createTransport({
     host: "smtp.qq.com",
@@ -16,7 +17,7 @@ function Mailer(mailId, VerificationCode) {
   let mailOptions = {
     from: "906271803@qq.com", //谁发的
     to: mailId, //发给谁
-    subject: "DailyWriter验证码为" + VerificationCode, //主题是什么
+    subject: "codehhan项目的账号注册验证码为" + VerificationCode, //主题是什么
     text: "验证码邮件", //文本内容
     html: "", //html模板
     // attachments: [              //附件信息,如果需要了再打开使用
