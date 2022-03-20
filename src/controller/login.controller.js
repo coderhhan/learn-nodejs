@@ -1,6 +1,7 @@
+const jwt = require("jsonwebtoken");
+const { PRIVATE_KEY } = require("../app/config");
 const Mailer = require("../utils/mailer");
 const createCode = require("../utils/verify-code");
-
 const {
   insertVerifyCode,
   updateVerifyCode,
@@ -39,7 +40,20 @@ class LoginController {
       return ctx.app.emit("error", err.message, ctx);
     }
   }
-  async loginUser(ctx, next) {}
+
+  async loginUser(ctx, next) {
+    const { name, userAccount, password } = ctx.userData;
+    const token = jwt.sign({ name, userAccount, password }, PRIVATE_KEY, {
+      algorithm: "RS256",
+      expiresIn: 2 * 1000,
+    });
+    const data = {
+      token,
+      name,
+      userAccount,
+    };
+    return ctx.app.emit("success", "登陆成功", ctx, data);
+  }
 }
 
 module.exports = new LoginController();

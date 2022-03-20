@@ -49,6 +49,11 @@ const errorHandler = (error, ctx, data) => {
       message = "账号或密码错误，请重新输入";
       break;
     }
+    case errorType.UNAUTHORIZATION: {
+      status = 415;
+      message = "未授权，请先登录";
+      break;
+    }
     default: {
       status = 500;
       message = error;

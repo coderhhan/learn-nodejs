@@ -1,6 +1,9 @@
+const jwt = require("jsonwebtoken");
+
 const md5password = require("../utils/password-handle");
 const userService = require("../service/user.service");
 const errorType = require("../constans/error-type");
+const { PUBLICK_KEY } = require("../app/config");
 const verifyUser = async (ctx, next) => {
   const { userAccount, password } = ctx.request.body;
   console.log(userAccount);
@@ -23,10 +26,28 @@ const verifyUser = async (ctx, next) => {
     const error = new Error(errorType.PASSWROD_IS_INCORRECT);
     return ctx.app.emit("error", error, ctx);
   }
+  ctx.userData = userData[0];
+  await next();
+};
+
+const verifyAuth = async (ctx, next) => {
+  console.log("鉴权验证通过~");
+  const authorization = ctx.headers.authorization;
+  const token = authorization.replace("Bearer ", "");
+  try {
+    const userData = jwt.verify(token, PUBLICK_KEY, {
+      algorithms: ["RS256"],
+    });
+    ctx.userData = userData;
+  } catch (err) {
+    const error = new Error(errorType.UNAUTHORIZATION);
+    ctx.app.emit("error", error, ctx, err.message);
+  }
 
   await next();
 };
 
 module.exports = {
   verifyUser,
+  verifyAuth,
 };
