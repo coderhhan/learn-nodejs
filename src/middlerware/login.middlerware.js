@@ -39,12 +39,11 @@ const verifyAuth = async (ctx, next) => {
       algorithms: ["RS256"],
     });
     ctx.userData = userData;
+    await next();
   } catch (err) {
     const error = new Error(errorType.UNAUTHORIZATION);
     ctx.app.emit("error", error, ctx, err.message);
   }
-
-  await next();
 };
 
 module.exports = {
